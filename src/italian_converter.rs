@@ -264,7 +264,11 @@ fn get_number_from_ordinal(ordinal: &str) -> String {
     cardinal
 }
 
-/// Converts an italian word representation to a number
+/// Converts an Italian word representation to a number
+/// 
+/// # Arguments
+/// 
+/// * `word` - The Italian word to convert.
 ///
 /// # Examples
 ///

@@ -1,4 +1,4 @@
-# italian-numbers
+# italian_numbers
 
 ## Purpose
 

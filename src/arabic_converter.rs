@@ -14,6 +14,10 @@ fn get_arabic_number(letter: char) -> u16 {
 }
 
 /// Converts a Roman number to an Arabic number
+/// 
+/// # Arguments
+/// 
+/// * `roman_number` - The Roman number to convert.
 ///
 /// # Examples
 ///

@@ -7,8 +7,32 @@ pub struct Options {
 }
 
 impl Options {
+    /// Creates a new `Options` instance with the specified settings.
+    ///
+    /// # Arguments
+    ///
+    /// * `female` - Set to `true` for feminine ordinals, `false` for masculine (default).
+    /// * `plural` - Set to `true` for plural ordinals, `false` for singular (default).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use italian_numbers::Options;
+    ///
+    /// let options = Options::new(true, false); // Feminine singular
+    /// ```
     pub fn new(female: bool, plural: bool) -> Options {
         Options { female, plural }
+    }
+
+    /// Returns `true` if feminine ordinals are enabled.
+    pub fn is_female(&self) -> bool {
+        self.female
+    }
+
+    /// Returns `true` if plural ordinals are enabled.
+    pub fn is_plural(&self) -> bool {
+        self.plural
     }
 }
 
@@ -64,7 +88,12 @@ fn converter(number: u64) -> Result<String, &'static str> {
     Ok(format!("{}esimo", word))
 }
 
-/// Converts a number to an italian word representation (ordinal number)
+/// Converts a number to its Italian ordinal representation.
+/// 
+/// # Arguments
+/// 
+/// * `number` - The number to convert.
+/// * `options` - Optional settings for gender and plurality.
 ///
 /// # Examples
 ///
@@ -80,7 +109,17 @@ fn converter(number: u64) -> Result<String, &'static str> {
 ///
 /// let result = ordinal_converter(63, None);
 /// assert_eq!(Ok(String::from("sessantatreesimo")), result);
+/// ```
+/// 
+/// ### Gender and Plurality
 ///
+/// By default, the function returns masculine singular ordinals. You can customize this behavior:
+/// * To get feminine singular ordinals, set `female` to `true`.
+/// * To get plural ordinals, set `plural` to `true`.
+/// 
+/// ```
+/// use italian_numbers::{ordinal_converter, Options};
+/// 
 /// /* female true */
 /// let result = ordinal_converter(1, Some(Options::new(true, false)));
 /// assert_eq!(Ok(String::from("prima")), result);

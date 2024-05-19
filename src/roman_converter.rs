@@ -1,6 +1,10 @@
 use crate::{ROMAN_HUNDREDS, ROMAN_TENS, ROMAN_THOUSANDS, ROMAN_UNITS};
 
 /// Converts an Arabic number to a Roman number
+/// 
+/// # Arguments
+/// 
+/// * `number` - The number to convert.
 ///
 /// # Examples
 ///

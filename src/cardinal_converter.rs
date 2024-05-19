@@ -157,7 +157,11 @@ fn replace_threes_occurrences(word: &str) -> String {
     result
 }
 
-/// Converts a number to an italian word representation (cardinal number)
+/// Converts a number to its Italian cardinal representation.
+/// 
+/// # Arguments
+/// 
+/// * `number` - The number to convert.
 ///
 /// # Examples
 ///
