@@ -8,7 +8,7 @@ license = "MIT"
 repository = "https://github.com/nikzanda/italian_numbers"
 readme = "README.md"
 rust-version = "1.78.0"
-keywords = ["italian_numbers", "italian", "numbers", "converter", "convert", "number", "word", "text", "natural", "language", "roman", "arabic", "cardinal", "ordinal"]
+keywords = ["italian", "numbers", "converter", "roman", "language"]
 categories = ["internationalization"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
