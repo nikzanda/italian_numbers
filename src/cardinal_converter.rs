@@ -158,34 +158,48 @@ fn replace_threes_occurrences(word: &str) -> String {
 }
 
 /// Converts a number to its Italian cardinal representation.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `number` - The number to convert.
+///
+/// * `bool` - If true, the function will return number with decimals
 ///
 /// # Examples
 ///
 /// ```
 /// use italian_numbers::cardinal_converter;
-/// 
-/// let result = cardinal_converter(1);
+///
+/// let result = cardinal_converter(1.0, false);
 /// assert_eq!(Ok(String::from("uno")), result);
 ///
-/// let result = cardinal_converter(90);
+/// let result = cardinal_converter(90.0, false);
 /// assert_eq!(Ok(String::from("novanta")), result);
 ///
-/// let result = cardinal_converter(709);
+/// let result = cardinal_converter(709.0, false);
 /// assert_eq!(Ok(String::from("settecentonove")), result);
 ///
-/// let result = cardinal_converter(-1);
+/// let result = cardinal_converter(1000.05, true);
+/// assert_eq!(Ok(String::from("mille/05")), result);
+///
+/// let result = cardinal_converter(9.0, true);
+/// assert_eq!(Ok(String::from("nove/00")), result);
+///
+/// let result = cardinal_converter(-1.0, false);
 /// assert_eq!(Ok(String::from("meno uno")), result);
 /// ```
-pub fn cardinal_converter(number: i64) -> Result<String, &'static str> {
-    if number.abs() > 999_999_999_999 {
+pub fn cardinal_converter(number: f64, include_decimals: bool) -> Result<String, &'static str> {
+    if number.is_infinite() {
+        return Ok(String::from("infinito"));
+    }
+    if number > 999_999_999_999.99 {
         return Err("greater than 999.999.999.999");
     }
+    if number < -999_999_999_999.99 {
+        return Err("lower than 999.999.999.999");
+    }
 
-    let sign = if number < 0 { "meno " } else { "" };
+    let sign = if number < 0.0 { "meno " } else { "" };
     let abs_number = number.abs();
 
     let mut word = word_calculator(abs_number as u64);
@@ -194,7 +208,12 @@ pub fn cardinal_converter(number: i64) -> Result<String, &'static str> {
         word.push('é');
     }
 
-    let result = replace_threes_occurrences(&word);
+    let mut result = replace_threes_occurrences(&word);
+
+    if include_decimals {
+        let decimals = ((abs_number * 100.0).floor() % 100.0) as u64;
+        result = format!("{}/{}", result, format!("{:02}", decimals));
+    }
 
     Ok(format!("{}{}", sign, result))
 }
@@ -210,12 +229,15 @@ mod tests {
 
         #[test]
         fn test_21() {
-            assert_eq!(cardinal_converter(21), Ok(String::from("ventuno")))
+            assert_eq!(cardinal_converter(21.0, false), Ok(String::from("ventuno")))
         }
 
         #[test]
         fn test_28() {
-            assert_eq!(cardinal_converter(28), Ok(String::from("ventotto")))
+            assert_eq!(
+                cardinal_converter(28.0, false),
+                Ok(String::from("ventotto"))
+            )
         }
     }
 
@@ -225,7 +247,7 @@ mod tests {
         #[test]
         fn test_greater_than_999_999_999_999() {
             assert_eq!(
-                cardinal_converter(999_999_999_999 + 1),
+                cardinal_converter(999_999_999_999.0 + 1.0, false),
                 Err("greater than 999.999.999.999")
             )
         }
@@ -236,23 +258,26 @@ mod tests {
 
         #[test]
         fn test_1() {
-            assert_eq!(cardinal_converter(1), Ok(String::from("uno")))
+            assert_eq!(cardinal_converter(1.0, false), Ok(String::from("uno")))
         }
 
         #[test]
         fn test_100() {
-            assert_eq!(cardinal_converter(100), Ok(String::from("cento")))
+            assert_eq!(cardinal_converter(100.0, false), Ok(String::from("cento")))
         }
 
         #[test]
         fn test_1_000() {
-            assert_eq!(cardinal_converter(1_000), Ok(String::from("mille")))
+            assert_eq!(
+                cardinal_converter(1_000.0, false),
+                Ok(String::from("mille"))
+            )
         }
 
         #[test]
         fn test_1_000_000() {
             assert_eq!(
-                cardinal_converter(1_000_000),
+                cardinal_converter(1_000_000.0, false),
                 Ok(String::from("un milione"))
             )
         }
@@ -260,7 +285,7 @@ mod tests {
         #[test]
         fn test_1_000_000_000() {
             assert_eq!(
-                cardinal_converter(1_000_000_000),
+                cardinal_converter(1_000_000_000.0, false),
                 Ok(String::from("un miliardo"))
             )
         }
@@ -271,18 +296,21 @@ mod tests {
 
         #[test]
         fn test_3() {
-            assert_eq!(cardinal_converter(3), Ok(String::from("tre")))
+            assert_eq!(cardinal_converter(3.0, false), Ok(String::from("tre")))
         }
 
         #[test]
         fn test_33() {
-            assert_eq!(cardinal_converter(33), Ok(String::from("trentatré")))
+            assert_eq!(
+                cardinal_converter(33.0, false),
+                Ok(String::from("trentatré"))
+            )
         }
 
         #[test]
         fn test_333() {
             assert_eq!(
-                cardinal_converter(333),
+                cardinal_converter(333.0, false),
                 Ok(String::from("trecentotrentatré"))
             )
         }
@@ -290,7 +318,7 @@ mod tests {
         #[test]
         fn test_3_333() {
             assert_eq!(
-                cardinal_converter(3_333),
+                cardinal_converter(3_333.0, false),
                 Ok(String::from("tremilatrecentotrentatré"))
             )
         }
@@ -298,7 +326,7 @@ mod tests {
         #[test]
         fn test_3_000_000() {
             assert_eq!(
-                cardinal_converter(3_000_000),
+                cardinal_converter(3_000_000.0, false),
                 Ok(String::from("tre milioni"))
             )
         }
@@ -306,7 +334,7 @@ mod tests {
         #[test]
         fn test_3_000_033() {
             assert_eq!(
-                cardinal_converter(3_000_033),
+                cardinal_converter(3_000_033.0, false),
                 Ok(String::from("tre milioni e trentatré"))
             )
         }
@@ -314,7 +342,7 @@ mod tests {
         #[test]
         fn test_33_003_000() {
             assert_eq!(
-                cardinal_converter(33_003_000),
+                cardinal_converter(33_003_000.0, false),
                 Ok(String::from("trentatré milioni e tremila"))
             )
         }
@@ -322,7 +350,7 @@ mod tests {
         #[test]
         fn test_3_033_000_000() {
             assert_eq!(
-                cardinal_converter(3_033_000_000),
+                cardinal_converter(3_033_000_000.0, false),
                 Ok(String::from("tre miliardi e trentatré milioni"))
             )
         }
@@ -330,25 +358,31 @@ mod tests {
         #[test]
         fn test_3_003_000_000() {
             assert_eq!(
-                cardinal_converter(3_003_000_000),
+                cardinal_converter(3_003_000_000.0, false),
                 Ok(String::from("tre miliardi e tre milioni"))
             )
         }
 
         #[test]
         fn test_3_000() {
-            assert_eq!(cardinal_converter(3_000), Ok(String::from("tremila")))
+            assert_eq!(
+                cardinal_converter(3_000.0, false),
+                Ok(String::from("tremila"))
+            )
         }
 
         #[test]
         fn test_23_000() {
-            assert_eq!(cardinal_converter(23_000), Ok(String::from("ventitremila")))
+            assert_eq!(
+                cardinal_converter(23_000.0, false),
+                Ok(String::from("ventitremila"))
+            )
         }
 
         #[test]
         fn test_103_103_103_103() {
             assert_eq!(
-                cardinal_converter(103_103_103_103),
+                cardinal_converter(103_103_103_103.0, false),
                 Ok(String::from(
                     "centotré miliardi e centotré milioni e centotremilacentotré"
                 ))
@@ -357,21 +391,96 @@ mod tests {
     }
 
     mod min_max {
+        use std::f64::INFINITY;
+
         use super::*;
 
         #[test]
         fn test_999_999_999_999() {
-            assert_eq!(cardinal_converter(999_999_999_999), Ok(String::from("novecentonovantanove miliardi e novecentonovantanove milioni e novecentonovantanovemilanovecentonovantanove")))
+            assert_eq!(cardinal_converter(999_999_999_999.0, false), Ok(String::from("novecentonovantanove miliardi e novecentonovantanove milioni e novecentonovantanovemilanovecentonovantanove")))
         }
 
         #[test]
         fn test_negative_999_999_999_999() {
-            assert_eq!(cardinal_converter(-999_999_999_999), Ok(String::from("meno novecentonovantanove miliardi e novecentonovantanove milioni e novecentonovantanovemilanovecentonovantanove")))
+            assert_eq!(cardinal_converter(-999_999_999_999.0, false), Ok(String::from("meno novecentonovantanove miliardi e novecentonovantanove milioni e novecentonovantanovemilanovecentonovantanove")))
         }
 
         #[test]
         fn test_0() {
-            assert_eq!(cardinal_converter(0), Ok(String::from("zero")))
+            assert_eq!(cardinal_converter(0.0, false), Ok(String::from("zero")))
+        }
+
+        #[test]
+        fn test_infinity() {
+            assert_eq!(
+                cardinal_converter(INFINITY, false),
+                Ok(String::from("infinito"))
+            )
+        }
+    }
+
+    mod decimals {
+        use super::*;
+
+        #[test]
+        fn test_9() {
+            assert_eq!(cardinal_converter(9.0, true), Ok(String::from("nove/00")));
+        }
+
+        #[test]
+        fn test_10_dot_45() {
+            assert_eq!(
+                cardinal_converter(10.45, true),
+                Ok(String::from("dieci/45"))
+            );
+        }
+
+        #[test]
+        fn test_10_dot_00() {
+            assert_eq!(
+                cardinal_converter(10.00, true),
+                Ok(String::from("dieci/00"))
+            );
+        }
+
+        #[test]
+        fn test_10_dot_06() {
+            assert_eq!(
+                cardinal_converter(10.06, true),
+                Ok(String::from("dieci/06"))
+            );
+        }
+
+        #[test]
+        fn test_145_dot_6() {
+            assert_eq!(
+                cardinal_converter(145.6, true),
+                Ok(String::from("centoquarantacinque/60"))
+            );
+        }
+
+        #[test]
+        fn test_3450_dot_0() {
+            assert_eq!(
+                cardinal_converter(3450.0, true),
+                Ok(String::from("tremilaquattrocentocinquanta/00"))
+            );
+        }
+
+        #[test]
+        fn test_10000_dot_999() {
+            assert_eq!(
+                cardinal_converter(10000.999, true),
+                Ok(String::from("diecimila/99"))
+            );
+        }
+
+        #[test]
+        fn test_10000_dot_99999999979() {
+            assert_eq!(
+                cardinal_converter(10000.99999999979, true),
+                Ok(String::from("diecimila/99"))
+            );
         }
     }
 
@@ -380,13 +489,16 @@ mod tests {
 
         #[test]
         fn test_200() {
-            assert_eq!(cardinal_converter(200), Ok(String::from("duecento")))
+            assert_eq!(
+                cardinal_converter(200.0, false),
+                Ok(String::from("duecento"))
+            )
         }
 
         #[test]
         fn test_27_347_687() {
             assert_eq!(
-                cardinal_converter(27_347_687),
+                cardinal_converter(27_347_687.0, false),
                 Ok(String::from(
                     "ventisette milioni e trecentoquarantasettemilaseicentottantasette"
                 ))
@@ -396,7 +508,7 @@ mod tests {
         #[test]
         fn test_200_000_000() {
             assert_eq!(
-                cardinal_converter(200_000_000),
+                cardinal_converter(200_000_000.0, false),
                 Ok(String::from("duecento milioni"))
             )
         }
@@ -404,7 +516,7 @@ mod tests {
         #[test]
         fn test_12_341() {
             assert_eq!(
-                cardinal_converter(12_341),
+                cardinal_converter(12_341.0, false),
                 Ok(String::from("dodicimilatrecentoquarantuno"))
             )
         }
@@ -412,7 +524,7 @@ mod tests {
         #[test]
         fn test_negative_34_564() {
             assert_eq!(
-                cardinal_converter(-34_564),
+                cardinal_converter(-34_564.0, false),
                 Ok(String::from(
                     "meno trentaquattromilacinquecentosessantaquattro"
                 ))
@@ -422,7 +534,7 @@ mod tests {
         #[test]
         fn test_2_398_406() {
             assert_eq!(
-                cardinal_converter(2_398_406),
+                cardinal_converter(2_398_406.0, false),
                 Ok(String::from(
                     "due milioni e trecentonovantottomilaquattrocentosei"
                 ))
@@ -432,7 +544,7 @@ mod tests {
         #[test]
         fn test_9_654_367() {
             assert_eq!(
-                cardinal_converter(9_654_367),
+                cardinal_converter(9_654_367.0, false),
                 Ok(String::from(
                     "nove milioni e seicentocinquantaquattromilatrecentosessantasette"
                 ))
@@ -442,7 +554,7 @@ mod tests {
         #[test]
         fn test_100_100_100() {
             assert_eq!(
-                cardinal_converter(100_100_100),
+                cardinal_converter(100_100_100.0, false),
                 Ok(String::from("cento milioni e centomilacento"))
             )
         }

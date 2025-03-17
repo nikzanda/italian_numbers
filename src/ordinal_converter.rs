@@ -41,7 +41,7 @@ fn converter(number: u64) -> Result<String, &'static str> {
         return Ok(ZERO_TEN_ORDINALS[number as usize].to_string());
     }
 
-    let mut word = cardinal_converter(number as i64)?;
+    let mut word = cardinal_converter(number as f64, false)?;
 
     word = word.replace(" e ", " ");
     word = Regex::new(r"([io])\s([ou])")
