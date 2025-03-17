@@ -15,3 +15,10 @@ categories = ["internationalization"]
 
 [dependencies]
 regex = "1.10.4"
+
+[pre-release-hook]
+command = ["git", "cliff", "-o", "CHANGELOG.md", "--tag", "{{version}}"]
+
+[release]
+publish = true
+push = true
